@@ -4,7 +4,7 @@
 ### Constants ###
 testing=0
 repo_dirs=/home/$USER/git_repos
-gg_file=/home/$USER/bin/.gitgit
+gg_file=$repo_dirs/.gitgit
 
 ### Functions ###
 
@@ -31,13 +31,13 @@ function _cloneRepo()
     cd $repo_dirs
     while IFS= read -r line
     do
-        if [[ $line == *"gitgit"* ]]; then
-              echo "Starting..."
+        if [[ $line == *"gitgit v"* ]]; then
+              printf "Starting...\n"
               continue
-          fi
+        fi
         git clone https://github.com/$line
     done <"$gg_file"
-    echo "Done"
+    printf "Done!\n"
     cd $OLDPWD
 }
 
@@ -45,8 +45,15 @@ function _cloneRepo()
 
 if [ $# -lt 1 ]; then
     exit 1
-elif [ ! -f $gg_file ]; then
-    echo -e "gitgit v0.1" >> $gg_file
+elif [ ! -d $repo_dirs ]; then
+    printf "Creating Repo Directory..."
+    mkdir $repo_dirs
+    printf "Done\n"
+    if [ ! -f $gg_file ]; then
+        printf "Creating gitgit storage file..."
+        echo -e "gitgit v0.1" >> $gg_file
+        printf "Done\n"
+    fi
 fi
 
 while getopts "hta:c" opt; do
