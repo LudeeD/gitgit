@@ -1,0 +1,78 @@
+#!/bin/bash
+# gitgit
+
+### Constants ###
+testing=0
+repo_dirs=/home/$USER/git_repos
+gg_file=/home/$USER/bin/.gitgit
+
+### Functions ###
+
+# Display Usage #
+function _usage
+{
+    printf "\n------------\n|  gitgit  |\n------------\n"
+    printf "Options:\n"
+    printf "  -h : show this\n"
+    printf "  -a : add repo to file\n"
+    printf "  -c : clone all repos\n"
+}
+
+# add repo info to file #
+function _addRepo()
+{
+    printf "Will addd the following repo to the file: %s\n" "$1"
+    printf "%s\n" "$1" >> $gg_file
+}
+
+# clone repos that are i the file #
+function _cloneRepo()
+{
+    cd $repo_dirs
+    while IFS= read -r line
+    do
+        if [[ $line == *"gitgit"* ]]; then
+              echo "Starting..."
+              continue
+          fi
+        git clone https://github.com/$line
+    done <"$gg_file"
+    echo "Done"
+    cd $OLDPWD
+}
+
+### Main ###
+
+if [ $# -lt 1 ]; then
+    exit 1
+elif [ ! -f $gg_file ]; then
+    echo -e "gitgit v0.1" >> $gg_file
+fi
+
+while getopts "hta:c" opt; do
+  case $opt in
+    a)
+        _addRepo $2
+        ;;
+    c)
+        _cloneRepo
+        ;;
+    h)
+        _usage
+        exit 0
+        ;;
+    t)
+        testing=1
+        ;;
+    \?)
+        echo "Invalid option: -$OPTARG" >&2
+        _usage
+        exit 1
+        ;;
+  esac
+done
+
+
+
+
+if [ $testing -eq 1 ]; then rm ~/bin/.gitgit; exit 0; fi
