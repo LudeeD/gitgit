@@ -28,16 +28,22 @@ function _addRepo()
 # clone repos that are i the file #
 function _cloneRepo()
 {
+    i=0
     cd $repo_dirs
     while IFS= read -r line
     do
         if [[ $line == *"gitgit v"* ]]; then
-              printf "Starting...\n"
               continue
         fi
-        git clone https://github.com/$line
-    done <"$gg_file"
-    printf "Done!\n"
+        if [[ ! $line == "-"* ]]; then
+            i+=1
+            git clone https://github.com/$line
+            line="-$line"
+        fi
+        echo "$line"
+    done < "$gg_file" > tmp
+    mv tmp $gg_file
+    printf "Done %d repos have been cloned\n" "$i"
     cd $OLDPWD
 }
 
@@ -63,6 +69,7 @@ while getopts "hta:c" opt; do
         ;;
     c)
         _cloneRepo
+        exit 0
         ;;
     h)
         _usage
